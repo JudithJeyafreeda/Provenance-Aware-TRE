@@ -1,0 +1,16 @@
+{
+  "n_patients": 1000,
+  "n_notes": 3353,
+  "n_facts": 2220,
+  "n_revision_edges": 220,
+  "n_adversarial": 2000,
+  "style_distribution": {
+    "terse_icu": 816,
+    "verbose_discharge": 844,
+    "structured_admission": 857,
+    "nursing_note": 836
+  },
+  "llm_paraphrase_ok": 3353,
+  "llm_paraphrase_fallback": 0,
+  "frac_patients_with_revision": 0.11
+}
