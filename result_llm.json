@@ -1,0 +1,1420 @@
+{
+  "config": {
+    "api_base": "http://gpusoif:8000/v1",
+    "api_key": "EMPTY",
+    "llm_model": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+    "temperature": 0.0,
+    "seed": 7,
+    "out_dir": "output",
+    "n_test": 60,
+    "n_manip_pairs": 60,
+    "min_coverage_chars": 10,
+    "min_coverage_frac": 0.03,
+    "necessity_n_probes": 3,
+    "necessity_agreement_threshold": 0.5,
+    "fuzzy_span_threshold": 0.85,
+    "run_certification": true,
+    "cert_n_examples": 20,
+    "cert_n_samples": 100,
+    "cert_alpha": 0.05,
+    "cert_epsilon_budget": 2,
+    "cert_theta_stability": 0.5,
+    "debug_first_call": false,
+    "diagnose_notes": [],
+    "site_id": "my_llm_site_v7",
+    "skip_kg": false,
+    "kg_n_notes": null,
+    "data_dir": "/mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset"
+  },
+  "test_metrics": {
+    "baseline": {
+      "accuracy_on_answered": 0.6166666666666667,
+      "abstain_rate": 0.0,
+      "mean_evidence_recall": 0.0,
+      "n": 60
+    },
+    "provenance_first": {
+      "accuracy_on_answered": 0.5555555555555556,
+      "abstain_rate": 0.55,
+      "mean_evidence_recall": 0.0,
+      "n": 60
+    }
+  },
+  "manipulation_metrics": {
+    "baseline": {
+      "adversarial_n": 60,
+      "adversarial_abstain_rate": 0.0,
+      "adversarial_pred_stability": 0.8833333333333333,
+      "adversarial_evidence_shift_rate": 0.03333333333333333,
+      "natural_n": 0,
+      "natural_abstain_rate": 0.0,
+      "natural_pred_stability": 0.0,
+      "natural_mean_evidence_recall": null
+    },
+    "provenance_first": {
+      "adversarial_n": 60,
+      "adversarial_abstain_rate": 0.43333333333333335,
+      "adversarial_pred_stability": 0.3,
+      "adversarial_evidence_shift_rate": 0.016666666666666666,
+      "natural_n": 0,
+      "natural_abstain_rate": 0.0,
+      "natural_pred_stability": 0.0,
+      "natural_mean_evidence_recall": null
+    }
+  },
+  "certification": {
+    "baseline": {
+      "n_examples": 20,
+      "n_certified": 5,
+      "n_base_abstained": 0,
+      "certification_rate": 0.25,
+      "mean_prediction_confidence": 0.9393215351878077,
+      "mean_provenance_confidence": 0.8495971936082924,
+      "per_example": [
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.09431028997394623,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.09431028997394623,
+          "n_pred_success": 100,
+          "n_evi_success": 16,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "abbreviation_swap": 34,
+            "token_insertion": 24,
+            "synonym_substitution": 20,
+            "ocr_noise": 22
+          },
+          "reason": "provenance",
+          "note_id": "P00811_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9007428432873401,
+          "provenance_confidence": 0.9455406146079194,
+          "p_pred_lower": 0.9007428432873401,
+          "p_evi_lower": 0.9455406146079194,
+          "n_pred_success": 96,
+          "n_evi_success": 99,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "abbreviation_swap": 27,
+            "synonym_substitution": 29,
+            "ocr_noise": 23,
+            "token_insertion": 21
+          },
+          "reason": "prediction",
+          "note_id": "P00415_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9455406146079194,
+          "provenance_confidence": 0.8739700654191771,
+          "p_pred_lower": 0.9455406146079194,
+          "p_evi_lower": 0.8739700654191771,
+          "n_pred_success": 99,
+          "n_evi_success": 94,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 30,
+            "synonym_substitution": 25,
+            "abbreviation_swap": 24,
+            "token_insertion": 21
+          },
+          "reason": "prediction",
+          "note_id": "P00214_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9296160675289299,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9296160675289299,
+          "n_pred_success": 100,
+          "n_evi_success": 98,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 21,
+            "ocr_noise": 28,
+            "abbreviation_swap": 32,
+            "token_insertion": 19
+          },
+          "reason": "provenance",
+          "note_id": "P00774_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.8237774022599773,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.8237774022599773,
+          "n_pred_success": 100,
+          "n_evi_success": 90,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 24,
+            "token_insertion": 25,
+            "synonym_substitution": 28,
+            "abbreviation_swap": 23
+          },
+          "reason": "provenance",
+          "note_id": "P00078_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9455406146079194,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9455406146079194,
+          "n_pred_success": 100,
+          "n_evi_success": 99,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 23,
+            "token_insertion": 25,
+            "abbreviation_swap": 22,
+            "synonym_substitution": 30
+          },
+          "reason": "provenance",
+          "note_id": "P00721_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9455406146079194,
+          "provenance_confidence": 0.8360177449703647,
+          "p_pred_lower": 0.9455406146079194,
+          "p_evi_lower": 0.8360177449703647,
+          "n_pred_success": 99,
+          "n_evi_success": 91,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 29,
+            "abbreviation_swap": 16,
+            "ocr_noise": 29,
+            "token_insertion": 26
+          },
+          "reason": "prediction",
+          "note_id": "P00247_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.7418245893678412,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.7418245893678412,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 83,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 26,
+            "abbreviation_swap": 32,
+            "token_insertion": 26,
+            "ocr_noise": 16
+          },
+          "reason": "prediction",
+          "note_id": "P00594_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.28476747614147957,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.28476747614147957,
+          "n_pred_success": 100,
+          "n_evi_success": 38,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "token_insertion": 27,
+            "abbreviation_swap": 22,
+            "synonym_substitution": 28,
+            "ocr_noise": 23
+          },
+          "reason": "provenance",
+          "note_id": "P00488_N00"
+        },
+        {
+          "status": "CERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 100,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "token_insertion": 32,
+            "synonym_substitution": 24,
+            "abbreviation_swap": 19,
+            "ocr_noise": 25
+          },
+          "note_id": "P00461_N00"
+        },
+        {
+          "status": "CERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 100,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 25,
+            "token_insertion": 22,
+            "synonym_substitution": 34,
+            "abbreviation_swap": 19
+          },
+          "note_id": "P00910_N00"
+        },
+        {
+          "status": "CERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 100,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 24,
+            "synonym_substitution": 26,
+            "token_insertion": 23,
+            "abbreviation_swap": 27
+          },
+          "note_id": "P00327_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.8116988678035574,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.8116988678035574,
+          "n_pred_success": 100,
+          "n_evi_success": 89,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "abbreviation_swap": 26,
+            "token_insertion": 36,
+            "synonym_substitution": 18,
+            "ocr_noise": 20
+          },
+          "reason": "provenance",
+          "note_id": "P00468_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9296160675289299,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9296160675289299,
+          "n_pred_success": 100,
+          "n_evi_success": 98,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 24,
+            "token_insertion": 20,
+            "abbreviation_swap": 27,
+            "ocr_noise": 29
+          },
+          "reason": "provenance",
+          "note_id": "P00342_N00"
+        },
+        {
+          "status": "CERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 100,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 25,
+            "abbreviation_swap": 30,
+            "token_insertion": 21,
+            "ocr_noise": 24
+          },
+          "note_id": "P00416_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9296160675289299,
+          "provenance_confidence": 0.9296160675289299,
+          "p_pred_lower": 0.9296160675289299,
+          "p_evi_lower": 0.9296160675289299,
+          "n_pred_success": 98,
+          "n_evi_success": 98,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 27,
+            "abbreviation_swap": 15,
+            "token_insertion": 28,
+            "synonym_substitution": 30
+          },
+          "reason": "prediction",
+          "note_id": "P00230_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9296160675289299,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9296160675289299,
+          "n_pred_success": 100,
+          "n_evi_success": 98,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "token_insertion": 28,
+            "abbreviation_swap": 32,
+            "synonym_substitution": 17,
+            "ocr_noise": 23
+          },
+          "reason": "provenance",
+          "note_id": "P00501_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.848442364135579,
+          "provenance_confidence": 0.9296160675289299,
+          "p_pred_lower": 0.848442364135579,
+          "p_evi_lower": 0.9296160675289299,
+          "n_pred_success": 92,
+          "n_evi_success": 98,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "abbreviation_swap": 20,
+            "ocr_noise": 35,
+            "token_insertion": 23,
+            "synonym_substitution": 22
+          },
+          "reason": "prediction",
+          "note_id": "P00617_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9455406146079194,
+          "provenance_confidence": 0.9455406146079194,
+          "p_pred_lower": 0.9455406146079194,
+          "p_evi_lower": 0.9455406146079194,
+          "n_pred_success": 99,
+          "n_evi_success": 99,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "ocr_noise": 19,
+            "token_insertion": 29,
+            "abbreviation_swap": 28,
+            "synonym_substitution": 24
+          },
+          "reason": "prediction",
+          "note_id": "P00277_N00"
+        },
+        {
+          "status": "CERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.9637833073548235,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.9637833073548235,
+          "n_pred_success": 100,
+          "n_evi_success": 100,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 25,
+            "abbreviation_swap": 35,
+            "token_insertion": 17,
+            "ocr_noise": 23
+          },
+          "note_id": "P00139_N00"
+        }
+      ]
+    },
+    "provenance_first": {
+      "n_examples": 20,
+      "n_certified": 0,
+      "n_base_abstained": 16,
+      "certification_rate": 0.0,
+      "mean_prediction_confidence": 0.15801934972448775,
+      "mean_provenance_confidence": 0.1576681126953827,
+      "per_example": [
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00811_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00415_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00214_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00774_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9637833073548235,
+          "provenance_confidence": 0.7997643163800312,
+          "p_pred_lower": 0.9637833073548235,
+          "p_evi_lower": 0.7997643163800312,
+          "n_pred_success": 100,
+          "n_evi_success": 88,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 25,
+            "token_insertion": 31,
+            "ocr_noise": 25,
+            "abbreviation_swap": 19
+          },
+          "reason": "provenance",
+          "note_id": "P00078_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00721_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00247_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.35032022923967193,
+          "provenance_confidence": 0.5073144796323634,
+          "p_pred_lower": 0.35032022923967193,
+          "p_evi_lower": 0.5073144796323634,
+          "n_pred_success": 45,
+          "n_evi_success": 61,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "token_insertion": 23,
+            "abbreviation_swap": 20,
+            "ocr_noise": 25,
+            "synonym_substitution": 32
+          },
+          "reason": "prediction",
+          "note_id": "P00594_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00488_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00461_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00910_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00327_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00468_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00342_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9455406146079194,
+          "provenance_confidence": 0.9455406146079194,
+          "p_pred_lower": 0.9455406146079194,
+          "p_evi_lower": 0.9455406146079194,
+          "n_pred_success": 99,
+          "n_evi_success": 99,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "token_insertion": 22,
+            "synonym_substitution": 29,
+            "ocr_noise": 15,
+            "abbreviation_swap": 34
+          },
+          "reason": "prediction",
+          "note_id": "P00416_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00230_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "prediction_confidence": 0.9007428432873401,
+          "provenance_confidence": 0.9007428432873401,
+          "p_pred_lower": 0.9007428432873401,
+          "p_evi_lower": 0.9007428432873401,
+          "n_pred_success": 96,
+          "n_evi_success": 96,
+          "n_samples": 100,
+          "alpha": 0.05,
+          "theta_stability": 0.5,
+          "epsilon_budget": 2,
+          "perturbation_space": [
+            "abbreviation_swap",
+            "ocr_noise",
+            "token_insertion",
+            "synonym_substitution"
+          ],
+          "perturbation_counts": {
+            "synonym_substitution": 23,
+            "abbreviation_swap": 19,
+            "ocr_noise": 28,
+            "token_insertion": 30
+          },
+          "reason": "prediction",
+          "note_id": "P00501_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00617_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00277_N00"
+        },
+        {
+          "status": "UNCERTIFIED",
+          "reason": "base_input_abstained",
+          "prediction_confidence": 0.0,
+          "provenance_confidence": 0.0,
+          "p_pred_lower": 0.0,
+          "p_evi_lower": 0.0,
+          "note_id": "P00139_N00"
+        }
+      ]
+    }
+  },
+  "knowledge_graph_summary": {
+    "site_summary": {
+      "site_id": "my_llm_site_v7",
+      "n_total_edges": 120,
+      "n_abstained": 33,
+      "abstention_rate": 0.275,
+      "relation_type_counts": {
+        "EVENT1-OVERLAP-EVENT2": 31,
+        "EVENT1-BEFORE-EVENT2": 36,
+        "EVENT2-BEFORE-EVENT1": 20
+      },
+      "mean_coverage": 0.3171322280025737
+    },
+    "n_disagreements": 33,
+    "n_contradiction_pairs": 33,
+    "contradiction_examples": [
+      {
+        "event1": "the patient was diagnosed with acute cholecystitis",
+        "event2": "anticoagulation with apixaban was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.1954674220963173
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.1954674220963173
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with deep vein thrombosis",
+        "event2": "thrombolytic therapy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.37
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.37
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with bacterial meningitis",
+        "event2": "beta-blocker therapy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.35918367346938773
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.35918367346938773
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with bacterial meningitis",
+        "event2": "intravenous furosemide was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.5180722891566265
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.5180722891566265
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with cellulitis of the lower extremity",
+        "event2": "surgical debridement was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.2803738317757009
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.2803738317757009
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with atrial fibrillation",
+        "event2": "fluid resuscitation was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.38738738738738737
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.38738738738738737
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with chronic kidney disease stage 3",
+        "event2": "laparoscopic appendectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.5345454545454545
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.5345454545454545
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with sepsis of unclear source",
+        "event2": "surgical debridement was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.49295774647887325
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.49295774647887325
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hyperosmolar hyperglycemic state",
+        "event2": "cholecystectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.20437956204379562
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.20437956204379562
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with atrial fibrillation",
+        "event2": "packed red blood cell transfusion was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.2545454545454545
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.19090909090909092
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with community-acquired pneumonia",
+        "event2": "laparoscopic appendectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.3618421052631579
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.3618421052631579
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hypertensive crisis",
+        "event2": "thrombolytic therapy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.14659685863874344
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.14659685863874344
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with pulmonary embolism",
+        "event2": "anticoagulation with apixaban was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.1306122448979592
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.1306122448979592
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hypertensive crisis",
+        "event2": "percutaneous coronary intervention was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.4107142857142857
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.4107142857142857
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with myocardial infarction",
+        "event2": "laparoscopic appendectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.4632352941176471
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.4632352941176471
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with deep vein thrombosis",
+        "event2": "vasopressor support was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.22857142857142856
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.22857142857142856
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hypertensive crisis",
+        "event2": "empiric ceftriaxone was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.26639344262295084
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.26639344262295084
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with chronic kidney disease stage 3",
+        "event2": "surgical debridement was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.38
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.38
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hypertensive crisis",
+        "event2": "cholecystectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.3537117903930131
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.3537117903930131
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with acute cholecystitis",
+        "event2": "cholecystectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.36444444444444446
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.36444444444444446
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hyperosmolar hyperglycemic state",
+        "event2": "intravenous furosemide was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.19615384615384615
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.19615384615384615
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hyperosmolar hyperglycemic state",
+        "event2": "insulin infusion protocol was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.19553072625698323
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.19553072625698323
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with hyperosmolar hyperglycemic state",
+        "event2": "supplemental oxygen therapy was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.13636363636363635
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.10101010101010101
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with myocardial infarction",
+        "event2": "vasopressor support was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.38064516129032255
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.38064516129032255
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with myocardial infarction",
+        "event2": "insulin infusion protocol was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.391304347826087
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.391304347826087
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with acute cholecystitis",
+        "event2": "insulin sliding scale was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.33121019108280253
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.33121019108280253
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with acute cholecystitis",
+        "event2": "lumbar puncture and antibiotics was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.3333333333333333
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.3333333333333333
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with acute pancreatitis",
+        "event2": "intravenous furosemide was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.21444201312910285
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.21444201312910285
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with sepsis of unclear source",
+        "event2": "hemodialysis was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.1854043392504931
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.1854043392504931
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with acute pancreatitis",
+        "event2": "supplemental oxygen therapy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.35772357723577236
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.35772357723577236
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with sepsis of unclear source",
+        "event2": "laparoscopic appendectomy was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.36507936507936506
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.36507936507936506
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with pulmonary embolism",
+        "event2": "insulin infusion protocol was initiated",
+        "relations": [
+          [
+            "EVENT1-BEFORE-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.16758747697974216
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.16758747697974216
+          ]
+        ]
+      },
+      {
+        "event1": "the patient was diagnosed with chronic kidney disease stage 3",
+        "event2": "percutaneous coronary intervention was initiated",
+        "relations": [
+          [
+            "EVENT1-OVERLAP-EVENT2",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_baseline",
+            0.5774647887323944
+          ],
+          [
+            "ABSTAINED",
+            "mistralai/Mistral-Small-3.2-24B-Instruct-2506_provenance_first",
+            0.5774647887323944
+          ]
+        ]
+      }
+    ]
+  }
+}
