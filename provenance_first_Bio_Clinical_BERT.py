@@ -2,7 +2,6 @@
 Provenance-First Clinical NLP: Proof-of-Concept with Bio_ClinicalBERT
 ========================================================================
 
-
 Requirements (run outside the hosted sandbox -- needs internet/GPU access):
     pip install torch transformers pandas numpy scipy networkx
 Dependency: provenance_temporal_kg.py must be in the same directory 
