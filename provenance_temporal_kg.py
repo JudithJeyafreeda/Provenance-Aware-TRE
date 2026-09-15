@@ -2,56 +2,6 @@
 Provenance Temporal Knowledge Graph (axis-3 implementation)
 ==============================================================
 
-Implements the third novelty axis described in the roadmap manuscript:
-provenance as an object that persists past a single prediction, into a
-multi-scale, temporally-versioned, federation-ready knowledge graph.
-
-This module is model-agnostic: it consumes the output shapes already
-produced by BOTH proof-of-concept scripts --
-
-  - provenance_first_poc_clinicalBERT.py's model.gated_forward(...) results
-  - provenance_first_poc_llm.py's gated_llm_call(...) / baseline_llm_call(...)
-    results
-
--- via two small adapter functions, so the same graph structure and the
-same audit/versioning/federation queries work regardless of which model
-produced the evidence trace.
-
-Design choices, matched to Section 5 of the manuscript:
-
-  Multi-scale       -> node `scale` attribute (event / episode / trajectory);
-                        only `event` is populated by the current POCs, but
-                        the schema supports the other two scales unchanged.
-  Federated-ready    -> every node/edge carries `site_id`; aggregate_temporal
-                        _motifs() computes ONLY summary statistics that would
-                        cross a federation boundary (relation-type counts,
-                        mean coverage, abstention rate) -- raw text and
-                        provenance spans never leave this function. Actual
-                        cross-site secure aggregation is NOT implemented;
-                        this provides the local per-site structure a
-                        federation layer would operate on.
-  Temporally         -> edges are NEVER overwritten. Re-extraction of the
-  versioned             same relation for the same event pair creates a NEW
-                        edge; if it disagrees with an existing active edge,
-                        both are cross-flagged (`contradicts` /
-                        `contradicted_by`) rather than one replacing the
-                        other. Explicit supersede_edge() lets a human
-                        reviewer close out an edge's validity window without
-                        deleting it. query_as_of() answers "what did we
-                        believe at time T?" directly.
-  Provenance-first   -> every edge stores the gate's own diagnostics
-                        verbatim (coverage, necessity_drop / necessity_
-                        satisfied, evidence indices/spans, abstention reason,
-                        model_id). Abstained relations are stored as an
-                        explicit `ABSTAINED` edge type rather than dropped.
-  Entity resolution  -> get_or_create_event_node() keys nodes by
-                        (note_id, label, scale) so that repeated/updated
-                        extractions of the SAME underlying event resolve to
-                        the SAME node. Without this, re-extractions would
-                        each create a fresh node pair and contradiction
-                        detection would silently never trigger (this was
-                        caught and fixed during testing -- always resolve
-                        event identity before adding a relation edge).
 
 Requirements:
     pip install networkx numpy
@@ -62,8 +12,8 @@ Run standalone for a self-contained demo:
 
     python provenance_temporal_kg.py
 
-Or import ingest_bert_result / ingest_llm_result into either POC script to
-persist real (not mock) gate outputs as they are produced.
+Or import ingest_bert_result / ingest_llm_result into either script to
+persist real gate outputs as they are produced.
 """
 
 import uuid
