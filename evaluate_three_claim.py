@@ -1,29 +1,6 @@
 #!/usr/bin/env python3
-"""
 
 
-Example
--------
-Baseline_BERT:  python evaluate_three_claims.py \
-  --dev_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/bert_baseline_dev_predictions.csv \
-  --test_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/bert_baseline_test_predictions.csv \
-  --out_dir /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/evaluation_bert_baseline \
-  --target_coverage 0.50
-Provenance BERT: python evaluate_three_claims.py \
-  --dev_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/bert_provenance_first_dev_predictions.csv \
-  --test_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/bert_provenance_first_test_predictions.csv \
-  --out_dir /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/BERT_predictions/evaluation_bert_gated \
-  --target_coverage 0.50
-LLM Baseline:  python evaluate_three_claims.py \
-  --dev_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/llm_baseline_dev_predictions.csv \
-  --test_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/llm_baseline_test_predictions.csv \
-  --out_dir /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/evaluation_llm_baseline \
-  --target_coverage 0.50
-python evaluate_three_claims.py \
-  --dev_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/llm_provenance_first_dev_predictions.csv \
-  --test_predictions /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/llm_provenance_first_test_predictions.csv \
-  --out_dir /mnt/eds_projets/eds_iam/Judith_ARIPPA/work/LLM/TEMPORALEX/output/synthetic_dataset/LLM_predictions/evaluation_llm_gated \
-  --target_coverage 0.50   """
 
 from __future__ import annotations
 
