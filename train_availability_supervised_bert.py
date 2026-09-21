@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+
 python train_availability_supervised_bert.py \
   --data_dir synthetic_dataset \
   --out_dir availability_supervised_bert \
