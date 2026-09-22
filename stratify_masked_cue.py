@@ -1,31 +1,5 @@
 #!/usr/bin/env python3
 """Stratify abstention results on the evidence-unavailable controls.
-
-No new model inference is needed. The script joins an existing control
-prediction file to the control CSV (evidence_removed_only.csv) on example_id
-and reports, for each model:
-
-  * remove_evidence: number of distinct input texts (1 means a single input)
-  * mask_temporal_cue split into
-      masked_cue = True   a cue was found and replaced by [MASKED_TEMPORAL_CUE]
-      masked_cue = False  no cue was found; the note is unchanged and an
-                          omission sentence was appended
-  * any other variant in the control CSV (for example silent_removal), reported as
-    its own stratum. For silent_keep (evidence available) read coverage and
-    accuracy, not abstention recall: the gate should answer there.
-  * the same metrics as evaluate_control_abstain_v1.py, with Wilson 95% CIs
-
-Usage:
-  python stratify_masked_cue.py \
-    --control_csv evidence_removed_only.csv \
-    --control_predictions llm_availability_gated_control_predictions_eval.csv \
-    --clean_predictions llm_availability_gated_clean_predictions_eval.csv \
-    --out_csv stratified_mask_results.csv
-
---clean_predictions is optional. When given, each stratum also reports the
-clean-input coverage and answered accuracy of the SAME base notes, so a note
-answered when clean but withheld once an omission notice is appended shows up
-directly (paired comparison).
 """
 import argparse
 import math
@@ -121,6 +95,8 @@ def main():
         keep.append("masked_cue")
     if "base_note_id" in ctrl.columns:
         keep.append("base_note_id")
+    if "validity_tier" in ctrl.columns:
+        keep.append("validity_tier")
     merged = pred.merge(ctrl[keep], on="example_id", how="left")
     unmatched = int(merged["variant"].isna().sum())
     if unmatched:
@@ -160,6 +136,10 @@ def main():
                         if x not in ("remove_evidence", "mask_temporal_cue")):
             sub = gm[gm["variant"] == v]
             rows.append({"model": model, "stratum": v, **summarize(sub), **extra(sub)})
+            if "validity_tier" in sub.columns and sub["validity_tier"].nunique() > 1:
+                for tier, st in sub.groupby("validity_tier"):
+                    rows.append({"model": model, "stratum": f"{v} [{tier}]",
+                                 **summarize(st), **extra(st)})
     out = pd.DataFrame(rows)
     out.to_csv(args.out_csv, index=False)
     with pd.option_context("display.width", 200, "display.max_columns", 20,
