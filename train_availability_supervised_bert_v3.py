@@ -1,41 +1,5 @@
 #!/usr/bin/env python3
 """
-v3 of train_availability_supervised_bert.py, layered on v2 (save/load/extra_controls).
-Default behaviour (no new flags below) is IDENTICAL to v2/v1: same training, same
-export() function, same output files. Numbers already reported are unaffected by
-running this file instead of v2 without the new flags.
-
-NEW: recomputing evidence recall against regenerated (post-paraphrase) gold spans,
-without retraining, using saved weights.
-
-  --export_predicted_spans   also reconstruct each prediction's evidence span as TEXT,
-                             from the model's per-token evidence probabilities plus the
-                             tokenizer's offset mapping, thresholded the same way
-                             "coverage" already is (score >= --evidence_token_threshold,
-                             default 0.1), and add it as a predicted_evidence_span column.
-  --gold_spans_v2 PATH       gold_spans_v2.csv from regenerate_gold_spans.py (needs
-                             note_id, gold_evidence_span_v2, reason). Combined with
-                             --export_predicted_spans, also computes evidence_recall_v2
-                             per row: token overlap between the corrected gold span and
-                             the model's OWN evidence-token mask for that row -- the same
-                             overlap definition used elsewhere in the pipeline
-                             (|predicted evidence tokens (>= threshold) INTERSECT gold
-                             evidence tokens| / |gold evidence tokens|), null when the row
-                             has no v2 span (reason != "accepted", e.g.
-                             evidence_lost_in_paraphrase).
-  --evidence_token_threshold per-token evidence-score cutoff for both the reconstructed
-                             predicted span and the recall computation (default 0.1,
-                             matching the existing "coverage" definition in
-                             AvailabilityBERT.predict).
-
-This changes ONLY the export path: it re-tokenizes each row directly (with
-return_offsets_mapping=True) and calls model.encode() once per row, so it does not
-touch train(), the DataLoader/collate path used for training, or the existing
-export()/prepare_extra_controls() functions, which remain available unchanged.
-
-NOT executed against a real model in the environment this was written in (no GPU/torch
-there). Inspect predicted_spans_report.json and a sample of predicted_evidence_span
-values by eye before trusting evidence_recall_v2.
 
 Usage (weights already saved from v2's --save_dir):
 python train_availability_supervised_bert_v3.py \
