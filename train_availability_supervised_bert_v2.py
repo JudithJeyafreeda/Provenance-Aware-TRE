@@ -1,20 +1,5 @@
 #!/usr/bin/env python3
 """
-v2 of train_availability_supervised_bert.py. Training and the standard exports are
-UNCHANGED. Three options are added so the trained gate can be evaluated on new
-control files without retraining from scratch each time:
-
-  --save_dir DIR        save the trained weights (heads only unless --finetune)
-  --load_dir DIR        skip training, load weights saved with --save_dir
-  --extra_controls A,B  comma-separated control CSVs (for example
-                        silent_removal_controls.csv,silent_keep_controls.csv);
-                        rows are restricted to the seed-7 TEST patients and scored
-                        by both models; predictions are written to
-                        {model}_{csv stem}_test_predictions.csv
-
-The extra CSVs need note_id, patient_id, text, gold_relation; the availability
-label is read from evidence_available_oracle when present (1 = the gate should
-answer, 0 = should abstain).
 
 1) Train once and keep the weights (also regenerates the standard predictions;
    compare them with the earlier files before relying on them):
