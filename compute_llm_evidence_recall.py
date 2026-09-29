@@ -1,26 +1,6 @@
 #!/usr/bin/env python3
 """Compute LLM evidence-span recall against regenerated (post-paraphrase) gold spans.
 
-Companion to regenerate_gold_spans.py and the predicted_evidence_span column added
-to llm_availability_gated_inference_v2.py. No new LLM calls: this is pure text
-overlap between two spans you already have.
-
-Unlike BERT's token-overlap recall (which needs the model's per-token scores),
-the LLM predicts a SPAN OF TEXT directly, so recall here is a character-overlap
-fraction between the predicted span and the corrected gold span, both located in
-the same (paraphrased) note text:
-
-    recall = |chars in predicted_span ∩ chars in gold_evidence_span_v2| / |gold_evidence_span_v2|
-
-computed via the actual character ranges of each span within the note (not just
-string overlap), matching how "coverage" is already defined elsewhere in this
-pipeline as a character-span fraction. A row is scorable only when its v2 gold
-span was accepted (reason == "accepted"); rows with no predicted span (abstained,
-or predicted_evidence_span empty) score 0.0, not null -- an abstention is a
-zero-recall answer for this metric, not a missing observation, since coverage on
-that row is genuinely zero. Set --exclude_abstained to instead treat abstained
-rows as not scorable, matching how you may want to separate "recall when it
-answers" from "recall overall".
 
 Usage:
   python compute_llm_evidence_recall.py \
