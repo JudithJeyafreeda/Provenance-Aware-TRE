@@ -1,27 +1,12 @@
 #!/usr/bin/env python3
 """Availability-gated LLM inference, v2: optional EVENT1/EVENT2 definitions.
 
-v1 sent only the note text and never said what EVENT1 and EVENT2 are, so the
-model had to guess which event is which. In this corpus EVENT1 is always the
-diagnosis and EVENT2 always the treatment initiation, and the original pipeline
-(provenance_first_LLM.py) defined the three relations in its prompt. v1 dropped
-that. v2 restores it. Gate logic (verbatim span, minimum coverage, necessity
-re-queries) is unchanged.
-
---event_mode
-  none        identical to v1 (reproduces earlier results; model label unchanged)
-  convention  adds the relation definitions to the system prompt (recommended)
-  columns     convention + passes the row's event1 / event2 text in the user
-              message (needs event1 and event2 columns in the input CSV)
-
-Use the same --event_mode for clean and control files, and the same script for
-both, so the model label matches and no relabelling is needed.
 
 python llm_availability_gated_inference_v2.py \
   --input_csv .../synthetic_notes_relation_only.csv \
   --out_dir   .../llm_v2_clean \
-  --api_base  http://gpusoif:8000/v1 \
-  --model     mistralai/Mistral-Small-3.2-24B-Instruct-2506 \
+  --api_base  <<apibase>> \
+  --model     MODEL USED FOR PAPER: mistralai/Mistral-Small-3.2-24B-Instruct-2506 \
   --event_mode convention
 """
 
