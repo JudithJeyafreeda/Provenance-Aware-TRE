@@ -1,0 +1,16 @@
+# Python 3.10 or newer.
+# Lower bounds are versions the APIs used here require; for an exact record of
+# the environment behind the paper, replace this file with `pip freeze` output.
+
+# Data, statistics and compression (all data-derived numbers in the paper)
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+networkx>=3.0
+
+# BioClinicalBERT gates
+torch>=2.0
+transformers>=4.30
+
+# LLM gate, silent controls and gold-span regeneration (OpenAI-compatible endpoint, e.g. vLLM)
+openai>=1.0
