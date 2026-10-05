@@ -1,11 +1,6 @@
 """
 RO2 Compression Operators: Aggregation, Revision-Representation, Temporal-Approximation
 ===========================================================================================
-
-
-Usage
------
-    python RO2_compression_operators.py --data_dir "path/to/data" --confidence_threshold 0.65 --fixed_window_k 2 --n_query_samples_per_patient 6 --seed 11
 """
 
 import os
@@ -111,7 +106,10 @@ def make_uncompressed_representation(facts, edges, notes, rng):
 
 def representation_size(rep):
     return {"n_nodes": len(rep["nodes"]), "n_edges": len(rep["edges"]),
-            "total": len(rep["nodes"]) + len(rep["edges"])}
+            "total": len(rep["nodes"]) + len(rep["edges"]),
+            # serialized size: counts the mention attributes that aggregation moves
+            # from nodes onto membership edges, which the node+edge count does not
+            "bytes": len(json.dumps(rep, default=str).encode("utf-8"))}
 
 
 def provenance_recall(rep, uncompressed):
@@ -400,8 +398,48 @@ def run_ro2_evaluation(data_dir, confidence_threshold, fixed_window_k,
             for d in days:
                 query_points.append((pid, concept_type, d))
 
+    # Subsets. Every revision post-dates the fact it revises, so the full query set is
+    # answerable by recency; these subsets isolate the points where revision matters.
+    facts_by_id = {f["fact_id"]: f for _, f in facts_df.iterrows()}
+    revision_patients = set(edges_df["patient_id"])
+    revision_days = defaultdict(list)  # (patient, concept) -> days on which a revision took effect
+    for _, r in edges_df.iterrows():
+        ct = facts_by_id[r["to_fact_id"]]["concept_type"]
+        revision_days[(r["patient_id"], ct)].append(int(r["day"]))
+    subsets = {
+        "all": lambda pid, ct, d: True,
+        "revision_patients": lambda pid, ct, d: pid in revision_patients,
+        "post_revision": lambda pid, ct, d: any(rd <= d for rd in revision_days[(pid, ct)]),
+    }
+
+    def index_by_key(rep):
+        idx = defaultdict(list)
+        for n in rep["nodes"]:
+            idx[(n.get("patient_id"), n.get("concept_type"))].append(n)
+        return idx
+
+    base_bytes = representation_size(uncompressed)["bytes"]
     results = {}
     for name, rep in representations.items():
+        idx = index_by_key(rep)
+        counts = {k: {"correct": 0, "wrong_value": 0, "no_value": 0, "abstain": 0, "n": 0} for k in subsets}
+        for pid, concept_type, day in query_points:
+            oracle_fact_id = evaluate_revision_sensitive_state(facts_by_patient[pid], day).get(concept_type)
+            oracle_value = next((f["value"] for f in facts_by_patient[pid]
+                                  if f["fact_id"] == oracle_fact_id), None)
+            pred = query_active_value({"nodes": idx[(pid, concept_type)]}, pid, concept_type, day)
+            outcome = ("abstain" if pred == "ABSTAIN" else "correct" if pred == oracle_value
+                       else "no_value" if pred is None else "wrong_value")
+            for k, member in subsets.items():
+                if member(pid, concept_type, day):
+                    counts[k][outcome] += 1
+                    counts[k]["n"] += 1
+        subset_results = {}
+        for k, c in counts.items():
+            answered = c["n"] - c["abstain"]
+            subset_results[k] = {**c, "coverage": answered / max(1, c["n"]),
+                                 "accuracy_on_resolved": c["correct"] / max(1, answered)}
+        size = representation_size(rep)
         n_correct = n_wrong = n_abstain = n_total = 0
         for pid, concept_type, day in query_points:
             oracle_fact_id = evaluate_revision_sensitive_state(facts_by_patient[pid], day).get(concept_type)
@@ -422,6 +460,8 @@ def run_ro2_evaluation(data_dir, confidence_threshold, fixed_window_k,
             "coverage": (n_total - n_abstain) / max(1, n_total),
             "n_correct": n_correct, "n_wrong": n_wrong, "n_abstain": n_abstain, "n_total": n_total,
             "provenance_recall": provenance_recall(rep, uncompressed),
+            "bytes_ratio": size["bytes"] / base_bytes,
+            "subsets": subset_results,
         }
     return results, query_points
 
@@ -474,6 +514,14 @@ def main():
     out_path = os.path.join(out_dir, "ro2_compression_results.json")
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2, default=str)
+    print("\nserialized size and subsets (accuracy on resolved / coverage; no-value and wrong-value counts)")
+    for name, r in results.items():
+        line = f"{name:<26} bytes {r['bytes_ratio']:.2f}x"
+        for k in ("all", "revision_patients", "post_revision"):
+            c = r["subsets"][k]
+            line += (f" | {k} n={c['n']} acc={c['accuracy_on_resolved']:.3f} cov={c['coverage']:.3f}"
+                     f" none={c['no_value']} wrong={c['wrong_value']}")
+        print(line)
     print(f"\nResults written to {out_path}")
     print("\nReminder: temporal_approximation's confidence values are SIMULATED (style-based "
           "heuristic), not from a real extraction model -- see module docstring before citing "
