@@ -99,17 +99,7 @@ python compression_operators.py --data_dir $D \
   --n_query_samples_per_patient 6 --seed 11
 ```
 
-Writes `$D/ro2_compression_results.json`. On the committed corpus the output is exactly:
-
-| Representation | Nodes | Edges | Size ratio | Query accuracy* | Query coverage | Provenance recall |
-|---|---|---|---|---|---|---|
-| Uncompressed | 6,926 | 7,146 | 1.00 | 1.000 | 1.000 | 1.000 |
-| Aggregation | 2,220 | 7,146 | 0.67 | 1.000 | 1.000 | 1.000 |
-| Revision-representation | 2,000 | 6,926 | 0.63 | 1.000 | 1.000 | 1.000 |
-| Temporal-approximation | 2,000 | 6,978 | 0.64 | 0.987 | 0.996 | 1.000 |
-| Fixed-window (k = 2) | 3,982 | 4,202 | 0.58 | 0.453 | 1.000 | 0.575 |
-
-\*Query accuracy is computed over answered (non-`ABSTAIN`) query points. Of 6,813 sampled points, temporal-approximation answers 6,701 correctly, answers 87 wrongly without a flag and returns `ABSTAIN` for 25. The fixed window answers every point and 3,725 of its answers are wrong. The JSON reports `n_correct`, `n_wrong` and `n_abstain` for each representation.
+Writes `$D/ro2_compression_results.json`. 
 
 Confidence values in temporal-approximation are simulated from note style, not produced by an extraction model.
 
@@ -126,8 +116,6 @@ python provenance_first_LLM.py --data_dir $D --out_dir output \
   --cert_n_examples 20 --cert_n_samples 100 --cert_alpha 0.05
 ```
 
-These write `output/poc_results_clinicalbert_v6.json` and `output/poc_results_llm_v7.json`.
-
 Things to know before reading these outputs:
 
 - **Certification ceiling.** At α = 0.01 with 100 perturbations, BERT certification is unattainable: the Clopper–Pearson lower bound for 100/100 at α/2 is 0.948, below the required 0.99. At least 528 perturbations per example are needed. At α = 0.05 the threshold is reachable from 72 perturbations.
@@ -142,12 +130,6 @@ Things to know before reading these outputs:
 python make_evidence_unavailable_adversarial.py --notes $D/synthetic_notes_v1.csv \
   --out_csv $D/evidence_removed_only.csv --variants remove_evidence,mask_temporal_cue --seed 7
 ```
-
-On the committed corpus this gives exactly:
-
-- 1,000 `remove_evidence` rows. No gold span is found in its note, so every row falls back to the same fixed sentence and the file has one distinct text.
-- 1,000 `mask_temporal_cue` rows. In 421 a listed cue phrase is replaced by `[MASKED_TEMPORAL_CUE]`. In the other 579 the note is kept and an omission notice is appended. The `masked_cue` column records which case applies.
-
 Every marker-carrying control contains an explicit statement or token of omission.
 
 **Marker-free.** Uses the LLM; the outputs are not bit-reproducible:
@@ -270,10 +252,3 @@ Definitions used throughout:
 - **Same model in several roles:** by default the silent-control editor and judge, the gold-span relocator and judge, and the LLM gate are all the same model. Pass `--judge_model` to use an independent judge.
 - **Majority-class rate:** 0.354 (354 of the 1,000 gold relations are `EVENT1-OVERLAP-EVENT2`).
 
-## Citation
-
-If you use this code, please cite the manuscript (citation to be added on publication) and this repository.
-
-## Licence
-
-To be added by the author.
