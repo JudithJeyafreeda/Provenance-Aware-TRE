@@ -105,6 +105,7 @@ PROBES = [
 
 
 def necessity(client, model, system, row, mode, relation, probes, temperature):
+    # Despite the historical name, this is a consistency check: the note is not masked.
     if relation is None:
         return 0.0
     matches = 0
@@ -126,13 +127,20 @@ def one(row, client, args, model_name):
     valid = isinstance(span, str) and span in text
     coverage = len(span) / max(1, len(text)) if valid else 0.0
     reason = None
+    agreement = None
+    if out.get("relation") is not None and args.always_probe:
+        # computed for every non-null relation so it can serve as a baseline score;
+        # the gate decision below is unchanged
+        agreement = necessity(client, args.model, system, row, args.event_mode, out["relation"],
+                              args.necessity_probes, args.temperature)
     if out.get("relation") is None:
         reason = "no_relation"
     elif not valid or len(span) < args.min_coverage_chars or coverage < args.min_coverage_frac:
         reason = "insufficient_evidence_span"
     else:
-        agreement = necessity(client, args.model, system, row, args.event_mode, out["relation"],
-                              args.necessity_probes, args.temperature)
+        if agreement is None:
+            agreement = necessity(client, args.model, system, row, args.event_mode, out["relation"],
+                                  args.necessity_probes, args.temperature)
         if agreement < args.necessity_agreement_threshold:
             reason = "necessity_check_failed"
 
@@ -155,6 +163,10 @@ def one(row, client, args, model_name):
         "coverage": coverage,
         "evidence_case": row.get("evidence_case", None),
         "evidence_span_valid": valid,
+        # exported for confidence-thresholding baselines
+        "raw_relation": out.get("relation"),
+        "llm_confidence": out.get("confidence"),
+        "reask_agreement": agreement,
     }
 
 
@@ -183,6 +195,9 @@ def main():
     p.add_argument("--min_coverage_frac", type=float, default=0.03)
     p.add_argument("--necessity_probes", type=int, default=3)
     p.add_argument("--necessity_agreement_threshold", type=float, default=0.5)
+    p.add_argument("--always_probe", type=int, default=1,
+                   help="1: run the re-queries for every non-null relation so re-query agreement is "
+                        "available as a baseline score (more calls; gate decisions unchanged)")
     args = p.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
