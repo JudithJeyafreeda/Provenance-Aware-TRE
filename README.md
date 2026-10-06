@@ -252,3 +252,5 @@ Definitions used throughout:
 - **Same model in several roles:** by default the silent-control editor and judge, the gold-span relocator and judge, and the LLM gate are all the same model. Pass `--judge_model` to use an independent judge.
 - **Majority-class rate:** 0.354 (354 of the 1,000 gold relations are `EVENT1-OVERLAP-EVENT2`).
 
+## Citation
+Cite this paper : https://arxiv.org/abs/2610.06177
