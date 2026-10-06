@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
 """
-
-Usage (weights already saved from v2's --save_dir):
-python train_availability_supervised_bert_v3.py \
-  --data_dir synthetic_dataset --out_dir availability_supervised_bert_v2 \
-  --load_dir availability_supervised_bert_v2/weights \
-  --export_predicted_spans --gold_spans_v2 gold_spans_v2/gold_spans_v2.csv
-
-Can be combined with --extra_controls on the same call. For silent_removal in
-particular, read the control's own abstention/accuracy numbers as the main
-result, not evidence_recall_v2: that control's whole point is that evidence is
-gone, so a low or null recall there is expected, not a defect.
 """
 
 
@@ -225,6 +214,9 @@ class AvailabilityBERT(nn.Module):
             outputs.append({
                 "abstained": bool(abstain),
                 "answer": None if abstain else int(torch.argmax(relation_probs[i]).item()),
+                # exported for confidence-thresholding baselines (gate decision unchanged)
+                "argmax": int(torch.argmax(relation_probs[i]).item()),
+                "max_relation_prob": float(relation_probs[i].max().item()),
                 "availability_probability": avail,
                 "evidence_score": float(evidence[i][mask[i].bool()].mean().item()),
                 "coverage": coverage,
@@ -289,6 +281,8 @@ def export(model, loader, df, device, model_name, threshold, output_path):
                     "correct": None if out["abstained"] else int(answer == gold),
                     "evidence_score": out["evidence_score"],
                     "availability_probability": out["availability_probability"],
+                    "argmax_relation": INV_LABELS[out["argmax"]],
+                    "max_relation_prob": out["max_relation_prob"],
                     "evidence_sufficient": None,
                     "contradiction_present": None,
                     "provenance_recorded": True,
@@ -366,6 +360,8 @@ def export_with_spans(model, df, tokenizer, device, model_name, availability_thr
                 "abstained": abstain, "correct": None if abstain else int(answer == gold),
                 "evidence_score": float(ev.mean().item()) if len(ev) else 0.0,
                 "availability_probability": avail, "coverage": coverage,
+                "argmax_relation": INV_LABELS[int(torch.argmax(relation_probs).item())],
+                "max_relation_prob": float(relation_probs.max().item()),
                 "gate_reason": "evidence_unavailable" if abstain else None,
                 "evidence_case": r.get("evidence_case", None),
                 "predicted_evidence_span": pred_span,
