@@ -45,6 +45,7 @@ Only the input corpus is committed. Model outputs, control files, regenerated go
 | `stratify_masked_cue.py` | Paired, stratified abstention results with Wilson 95% intervals: each control against the same notes when clean, split by control type, masked cue and silent-removal tier. No model calls. |
 | `bert_control_inference.py` | Coverage-gated BERT training and control inference (intermediate experiment). |
 | `bert_prediction_export_v1.py`, `llm_prediction_export_v1.py`, `evaluate_oracle_abstention_metrics.py`, `evaluate_three_claim.py` | Auxiliary and exploratory scripts. |
+| `Judge.py`, `prepare_judge_input.py`|Judge scripts|
 
 ---
 
