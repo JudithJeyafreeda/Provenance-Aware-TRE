@@ -29,7 +29,7 @@ The same code and data also support a second article, which evaluates the eviden
 | `synthetic_adversarial_v1.csv` | 2,000 contradiction-injected variants. |
 | `synthetic_generation_diagnosis_v1.json` | Generator diagnostics (counts, style distribution, paraphrase success). |
 
-Only the input corpus is committed. Model outputs, control files, regenerated gold spans and evaluation results are **not** distributed; every one of them is produced by the scripts below.
+Only the input corpus is committed. Model outputs, control files, judge outputs, regenerated gold spans and evaluation results are not distributed in this repository; every one of them is produced by the scripts below, and they are available from the author on reasonable request. Steps that call an LLM are not bit-reproducible (see Reproducibility notes), so regenerated outputs give close but not identical counts; `verify_paper_numbers.py` checks the article's numbers against a given set of outputs.
 
 ### Scripts
 
@@ -407,4 +407,4 @@ Evidence-unavailable controls, independent judge and abstention protocol:
 
 > J. J. Andrew. *Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction.* Submitted to *npj Digital Medicine* (2026).
 
-Archived release: https://doi.org/10.5281/zenodo.23732476
+Archived release: https://doi.org/10.5281/zenodo.23809568
