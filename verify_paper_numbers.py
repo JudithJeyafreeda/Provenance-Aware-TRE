@@ -2,15 +2,6 @@
 """Recompute every data-derived number in the manuscript from the saved outputs and
 compare it with the value printed in the paper.
 
-No model calls. Run from the repository root after the pipeline in README.md:
-
-  python verify_paper_numbers.py --data_dir output/synthetic_dataset \
-      --bert_dir output/synthetic_dataset/availability_supervised_bert_v2 \
-      --llm_dir output/synthetic_dataset/llm_v2 \
-      [--llm_rerun_dirs output/synthetic_dataset/llm_v2_rerun1,output/synthetic_dataset/llm_v2_rerun2] \
-      [--rejudge_csv output/synthetic_dataset/silent_controls/silent_removal_controls_judge2.csv] \
-      --out_csv paper_number_check.csv
-
 Every row reports: section, quantity, paper value, recomputed value, status.
 Status is OK when the recomputed value rounds to the printed value, MISMATCH otherwise,
 and MISSING when the input file for that number was not found. Sections whose
