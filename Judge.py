@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Judge.py - independent (cross-family) judge for the marker-free controls.
+judge_qwen.py - independent (cross-family) judge for the marker-free controls.
+
+
+Only the standard library is required.
 """
 import argparse
 import hashlib
