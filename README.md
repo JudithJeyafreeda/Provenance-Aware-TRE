@@ -407,4 +407,4 @@ Evidence-unavailable controls, independent judge and abstention protocol:
 
 > J. J. Andrew. *Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction.* Submitted to *npj Digital Medicine* (2026).
 
-Archived release: https://doi.org/10.5281/zenodo.23809568
+Archived release: [https://doi.org/10.5281/zenodo.23809568](https://doi.org/10.5281/zenodo.23810126)
