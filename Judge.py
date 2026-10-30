@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-judge_qwen.py - independent (cross-family) judge for the marker-free controls.
+Judge.py - supplementary independent (cross-family) judge for the marker-free controls.
 
 
 Only the standard library is required.
@@ -152,10 +152,10 @@ def judge_one(args, system, note_id, condition, text):
     evidence = j.get("evidence")
     evidence = None if evidence in (None, "null", "") else str(evidence)
     evidence_ok = bool(evidence) and norm_ws(evidence).lower() in norm_ws(text).lower()
-    # An answer without a verbatim, in-note span is treated as no determination
-    # (mirrors the citation rule of the LLM gate, Section 3.2).
+    # A determination without a verbatim, in-note span is reported as "unsupported" and
+    # excluded; counting it as "none" would inflate the strict tier.
     if verdict in ("explicit", "implied") and (relation is None or not evidence_ok):
-        verdict_eff, relation_eff = "none", None
+        verdict_eff, relation_eff = "unsupported", None
     elif verdict == "none":
         verdict_eff, relation_eff = "none", None
     else:
@@ -212,7 +212,7 @@ def cmd_judge(args):
 # ----------------------------------------------------------------------------- report
 def qwen_tier(j):
     """Map a judgment of an edited (removal) note to a tier."""
-    if j is None or j["verdict"] == "parse_error":
+    if j is None or j["verdict"] in ("parse_error", "unsupported"):
         return "missing"
     if j["verdict"] == "none" or j["relation"] is None:
         return "strict"
@@ -248,7 +248,7 @@ def cmd_report(args):
     ]}
     conf = Counter()
     pairs = []
-    n_clean = n_clean_ok = n_orig_prefilter_overlap = 0
+    n_clean = n_clean_ok = 0
 
     for nid, r in notes.items():
         gold = norm_relation(r[args.f_gold])
@@ -321,9 +321,8 @@ def cmd_report(args):
     with open(os.path.join(args.outdir, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
     print(json.dumps(summary, indent=2))
-    print("\nNext: re-run BOTH gates restricted to the ID lists in", args.outdir,
-          "and report results on 'removal_strict_both_judges' (judge-independent core) alongside "
-          "'removal_all_qwen'. Pair every edited note with its clean prediction as before.")
+    print("\nNext: score both gates on these ID lists with existing predictions (no re-run needed):\n"
+          f"  python qwen_subset_eval.py --idlists {args.outdir} --notes ... --llm_dir ... --bert_dir ...")
 
 
 # ----------------------------------------------------------------------------- spans
