@@ -12,6 +12,11 @@ The code tests three auditability properties of a clinical timeline-reconstructi
 
 ---
 
+The same code and data also support a second article, which evaluates the evidence-availability gates in depth:
+
+> **Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction** (J. J. Andrew; submitted to *npj Digital Medicine*). It adds confidence-thresholding baselines, per-class analyses, run-to-run stability, a no-learning shortcut baseline and **re-judging of the marker-free controls by a model from a different family (Qwen)**. Steps 8–10 below reproduce its additional results.
+
+
 ## Repository contents
 
 ### Data
@@ -45,7 +50,15 @@ Only the input corpus is committed. Model outputs, control files, regenerated go
 | `stratify_masked_cue.py` | Paired, stratified abstention results with Wilson 95% intervals: each control against the same notes when clean, split by control type, masked cue and silent-removal tier. No model calls. |
 | `bert_control_inference.py` | Coverage-gated BERT training and control inference (intermediate experiment). |
 | `bert_prediction_export_v1.py`, `llm_prediction_export_v1.py`, `evaluate_oracle_abstention_metrics.py`, `evaluate_three_claim.py` | Auxiliary and exploratory scripts. |
-| `Judge.py`, `prepare_judge_input.py`|Judge scripts|
+| `selective_baselines.py` | Confidence-thresholding baselines: thresholds a score to the gate's clean coverage and reports abstention and AUROC (bootstrap 95% intervals) for each control. No model calls. |
+| `per_class_silent.py` | Per-gold-class breakdown of `silent_removal` and `silent_keep` results, paired with the same notes when clean. No model calls. |
+| `rejudge_silent_controls.py` | **Independent judge.** Re-judges every accepted `silent_removal` edit with another model (e.g. Qwen), using exactly the judge prompt, inputs and tier rule of `make_silent_removal_controls.py`; prints the tier crosstab, agreement and Cohen's kappa. Used for the cross-family results of the *npj* article. |
+| `prepare_judge_input.py` | Builds `notes.jsonl` (clean note, both edits and the original tier per note) for `Judge.py`. |
+| `Judge.py` | Supplementary independent judge with its own three-way prompt (explicit / implied / none). Also judges the clean notes (pre-filter) and the `silent_keep` edits, and writes ID lists of the notes it validates. Its prompt differs from the original judge, so tier agreement from this script is **not** comparable with the original judge; use `rejudge_silent_controls.py` for that. |
+| `qwen_subset_eval.py` | Scores both gates on the ID lists written by `Judge.py report`, paired with the same notes when clean. No model calls. |
+| `shortcut_baseline.py` | No-learning shortcut rule (one day mention → overlap; treatment mentioned first → EVENT2-BEFORE-EVENT1; otherwise EVENT1-BEFORE-EVENT2). No model calls. |
+| `check_notice_truncation.py` | Checks whether the appended omission notice survives BERT's 128-token truncation for each notice-appended control. |
+| `verify_paper_numbers.py` | Recomputes every data-derived number in the *npj* article from the saved outputs and compares it with the printed value (OK / MISMATCH / MISSING). No model calls. |
 
 ---
 
@@ -245,13 +258,153 @@ Definitions used throughout:
 
 ---
 
+
+### 8. Confidence baselines and per-class analysis (*npj* article)
+
+No model calls. The baselines need scores the original exports do not contain, so export them once from the saved BERT weights (no retraining):
+
+```bash
+python train_availability_supervised_bert_v3.py --data_dir $D \
+  --out_dir $D/availability_supervised_bert_v3_export \
+  --load_dir $D/availability_supervised_bert_v2/weights \
+  --extra_controls $D/silent_controls/silent_removal_controls.csv,$D/silent_controls/silent_keep_controls.csv
+B=$D/availability_supervised_bert_v3_export
+```
+
+This writes `argmax_relation` and `max_relation_prob` for both models (`regular_bert_*` = no availability loss). The LLM baselines use a second run of the gate with `--always_probe 1` (the default), which records `llm_confidence` and `reask_agreement` for every non-null answer; in the article this run is `llm_conf`.
+
+```bash
+mkdir -p $D/baselines $D/stratified_all
+GOLD="$D/synthetic_notes_relation_only.csv $D/silent_controls/silent_removal_controls.csv"
+# BERT availability score (repeat with --score_col max_relation_prob, and with the regular_bert_* files)
+python selective_baselines.py --clean $B/provenance_first_availability_supervised_clean_test_predictions.csv \
+  --condition marker=$B/provenance_first_availability_supervised_unavailable_test_predictions.csv \
+  --condition removal=$B/provenance_first_availability_supervised_silent_removal_controls_test_predictions.csv \
+  --condition removal_strict=$B/provenance_first_availability_supervised_silent_removal_controls_test_predictions.csv \
+  --condition keep=$B/provenance_first_availability_supervised_silent_keep_controls_test_predictions.csv \
+  --gold $GOLD --tier_col validity_tier --tier strict --tier_condition removal_strict \
+  --pred_col argmax_relation --score_col availability_probability --target_coverage 0.98667 \
+  --out $D/baselines/bert_availability.csv
+
+# LLM verbalised confidence (repeat with --score_col reask_agreement)
+C=$D/llm_conf
+python selective_baselines.py --clean $C/llm_availability_gated_synthetic_notes_relation_only_predictions.csv \
+  --condition marker=$C/llm_availability_gated_evidence_removed_only_predictions.csv \
+  --condition removal=$C/llm_availability_gated_silent_removal_controls_predictions.csv \
+  --condition removal_strict=$C/llm_availability_gated_silent_removal_controls_predictions.csv \
+  --condition keep=$C/llm_availability_gated_silent_keep_controls_predictions.csv \
+  --gold $GOLD --tier_col validity_tier --tier strict --tier_condition removal_strict \
+  --pred_col raw_relation --score_col llm_confidence --target_coverage 0.700 \
+  --out $D/baselines/llm_confidence.csv
+
+# Per-class breakdown (BERT shown; same for the LLM files)
+python per_class_silent.py \
+  --controls $D/silent_controls/silent_removal_controls.csv $D/silent_controls/silent_keep_controls.csv \
+  --control_predictions $B/provenance_first_availability_supervised_silent_removal_controls_test_predictions.csv \
+                        $B/provenance_first_availability_supervised_silent_keep_controls_test_predictions.csv \
+  --clean_predictions $B/provenance_first_availability_supervised_clean_test_predictions.csv \
+  --out $D/stratified_all/bert_per_class.csv
+```
+
+### 9. Independent (cross-family) judge (*npj* article)
+
+The original editor, judge and LLM gate are all Mistral. Because the strict tier is defined by the judge failing to infer the relation, the article re-judges every accepted removal with a model from a different family. Serve it on an OpenAI-compatible endpoint (the article used `Qwen/Qwen3.8-27B` with vLLM) and run from the repository root:
+
+```bash
+python rejudge_silent_controls.py \
+  --controls $D/silent_controls/silent_removal_controls.csv \
+  --out_csv  $D/silent_controls/silent_removal_controls_qwen.csv \
+  --api_base <qwen endpoint>/v1 --model Qwen/Qwen3.8-27B --workers 8
+```
+
+- Same judge prompt, inputs (note plus the two event descriptions) and tier rule as the original judge, at temperature 0. For Qwen3 hybrid-thinking models, thinking is switched off (`--no_think 1`, default) and any `<think>` block is removed before parsing.
+- The output keeps the original tier in `validity_tier_judge1` and writes the new one to `validity_tier` (`strict`, `implied_only` or `judge_error`).
+- Expected output for the article's run: 0 judge errors; 350 of 507 tiers agree (69.0%, Cohen's κ = 0.40); 219 of 238 original strict notes stay strict; 138 of 269 original implied-only notes become strict.
+
+Gate results on the independent judge's tiers, and on the four combinations of both judges (Table 3 of the article), need no model calls:
+
+```bash
+# combined label, e.g. "M:strict|Q:strict" = strict under both judges (the judge-independent core)
+python -c "
+import pandas as pd
+p='$D/silent_controls/silent_removal_controls_qwen.csv'
+d=pd.read_csv(p); d['validity_tier']='M:'+d.validity_tier_judge1+'|Q:'+d.validity_tier
+d.to_csv(p.replace('_qwen.csv','_qwen_combo.csv'), index=False)"
+
+python stratify_masked_cue.py --control_csv $D/silent_controls/silent_removal_controls_qwen_combo.csv \
+  --control_predictions $D/llm_v2/llm_availability_gated_silent_removal_controls_predictions.csv \
+  --clean_predictions $D/llm_v2/llm_availability_gated_synthetic_notes_relation_only_predictions.csv \
+  --out_csv $D/stratified_all/llm_silent_removal_combo.csv
+
+python stratify_masked_cue.py --control_csv $D/silent_controls/silent_removal_controls_qwen.csv \
+  --control_predictions $B/provenance_first_availability_supervised_silent_removal_controls_test_predictions.csv \
+  --clean_predictions $B/provenance_first_availability_supervised_clean_test_predictions.csv \
+  --out_csv $D/stratified_all/bert_silent_removal_qwen.csv
+```
+
+**Optional: `Judge.py`.** A second, broader check with its own explicit/implied/none prompt. It also re-runs the clean-note pre-filter and the `silent_keep` acceptance with the independent judge. Because its prompt differs from the original judge, use it for those two checks, not for tier agreement. A determination whose quoted evidence is not a verbatim substring of the note is reported as `unsupported` and excluded, not counted as strict.
+
+```bash
+python prepare_judge_input.py \
+  --notes $D/synthetic_notes_v1.csv --notes-id note_id --notes-text text --notes-gold gold_relation \
+  --removal $D/silent_controls/silent_removal_controls.csv --removal-id base_note_id --removal-text text --removal-tier validity_tier \
+  --keep $D/silent_controls/silent_keep_controls.csv --keep-id base_note_id --keep-text text \
+  --judge2 $D/silent_controls/silent_removal_controls_judge2.csv --out notes.jsonl
+# expected: 1000 notes, 507 silent_removal edits, 452 silent_keep edits
+
+python Judge.py judge  --input notes.jsonl --out qwen_judgments.jsonl \
+  --base-url <qwen endpoint>/v1 --model Qwen/Qwen3.8-27B --workers 8
+python Judge.py report --input notes.jsonl --judgments qwen_judgments.jsonl --outdir qwen_validation
+
+python qwen_subset_eval.py --notes $D/synthetic_notes_v1.csv --idlists qwen_validation \
+  --llm_dir $D/llm_v2 --bert_dir $B --out_csv $D/stratified_all/qwen_subset_results.csv
+```
+
+`Judge.py` caches every answer in the `--out` file, so an interrupted run resumes where it stopped.
+
+### 10. Shortcut baseline, truncation check and number verification (*npj* article)
+
+No model calls (the truncation check downloads the BioClinicalBERT tokenizer).
+
+```bash
+python shortcut_baseline.py --data_dir $D
+# expected: 0.667 overall, 0.667 on the seed-7 test split, 0.996 on structured-admission notes
+
+python check_notice_truncation.py --controls $D/evidence_removed_only.csv \
+  --predictions $B/provenance_first_availability_supervised_unavailable_test_predictions.csv \
+  --clean_predictions $B/provenance_first_availability_supervised_clean_test_predictions.csv
+# expected: the 3 notice-appended controls that BERT answered all exceed 128 tokens
+
+python verify_paper_numbers.py --data_dir $D \
+  --bert_dir $B --baseline_bert_dir $B \
+  --llm_dir $D/llm_v2 --llm_rerun_dirs $D/llm_conf,$D/llm_v2_spans --baseline_llm_dir $D/llm_conf \
+  --recall_csv $D/llm_v2_spans/llm_evidence_recall_v2.csv \
+  --rejudge_csv $D/silent_controls/silent_removal_controls_judge2.csv \
+  --qwen_csv $D/silent_controls/silent_removal_controls_qwen.csv \
+  --out_csv paper_number_check.csv
+```
+
+`verify_paper_numbers.py` prints one row per number (section, quantity, printed value, recomputed value, status). The three runs of the LLM gate are `llm_v2` (first run; Tables 1–3), `llm_conf` (second run, with confidence and re-query scores; Table 5) and `llm_v2_spans` (third run, clean notes only; cited-span analysis). Rows for files a run does not contain are reported as MISSING, not failed.
+
+---
+
 ## Reproducibility notes
 
 - **Bit-reproducible from the committed data:** corpus statistics, compression (step 1), the marker-carrying controls (step 3) and the BERT patient split.
 - **Not bit-reproducible:** anything that calls the LLM (paraphrasing, silent controls, gold-span regeneration, LLM gates). Re-runs give close but not identical counts, even at temperature 0.0.
 - **Seeds:** BERT pipelines and splits use seed 7; compression query sampling uses seed 11.
-- **Same model in several roles:** by default the silent-control editor and judge, the gold-span relocator and judge, and the LLM gate are all the same model. Pass `--judge_model` to use an independent judge.
+- **Same model in several roles:** by default the silent-control editor and judge, the gold-span relocator and judge, and the LLM gate are all the same model. Re-running the same judge reproduces 500 of 507 tiers, but a judge from another family (step 9) agrees on only 350 of 507 (κ = 0.40), so report results on the notes both judges accept. `--judge_model` in `make_silent_removal_controls.py` and `regenerate_gold_spans.py` sets a different judge at generation time.
+- **LLM run-to-run stability:** three runs of the LLM gate at temperature 0 gave clean coverage 0.700, 0.699 and 0.694, and 98.3–98.7% identical clean decisions between any two runs.
 - **Majority-class rate:** 0.354 (354 of the 1,000 gold relations are `EVENT1-OVERLAP-EVENT2`).
 
 ## Citation
-Cite this paper : https://arxiv.org/abs/2610.06177
+
+Pipeline, compression and provenance graph:
+
+> J. J. Andrew. *Auditable Clinical Timeline Reconstruction with Provenance-Aware Evidence Graphs.* arXiv:2610.06177 (2026). https://arxiv.org/abs/2610.06177
+
+Evidence-unavailable controls, independent judge and abstention protocol:
+
+> J. J. Andrew. *Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction.* Submitted to *npj Digital Medicine* (2026).
+
+Archived release: https://doi.org/10.5281/zenodo.23732476
