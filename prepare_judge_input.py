@@ -2,6 +2,7 @@
 """
 prepare_judge_input.py - build notes.jsonl for Judge.py from the repo CSVs.
 """
+import argparse
 import csv
 import json
 import sys
