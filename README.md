@@ -14,7 +14,7 @@ The code tests three auditability properties of a clinical timeline-reconstructi
 
 The same code and data also support a second article, which evaluates the evidence-availability gates in depth:
 
-> **Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction** (J. J. Andrew; submitted to *npj Digital Medicine*). It adds confidence-thresholding baselines, per-class analyses, run-to-run stability, a no-learning shortcut baseline and **re-judging of the marker-free controls by a model from a different family (Qwen)**. Steps 8–10 below reproduce its additional results.
+> **Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction** (J. J. Andrew; under review). It adds confidence-thresholding baselines, per-class analyses, run-to-run stability, a no-learning shortcut baseline, **re-judging of the marker-free controls by a model from a different family (Qwen)** and **retraining of the BERT gate under five kinds of negative training examples** (five seeds, frozen and fine-tuned encoder). Steps 8–11 below reproduce its additional results.
 
 
 ## Repository contents
@@ -52,13 +52,16 @@ Only the input corpus is committed. Model outputs, control files, judge outputs,
 | `bert_prediction_export_v1.py`, `llm_prediction_export_v1.py`, `evaluate_oracle_abstention_metrics.py`, `evaluate_three_claim.py` | Auxiliary and exploratory scripts. |
 | `selective_baselines.py` | Confidence-thresholding baselines: thresholds a score to the gate's clean coverage and reports abstention and AUROC (bootstrap 95% intervals) for each control. No model calls. |
 | `per_class_silent.py` | Per-gold-class breakdown of `silent_removal` and `silent_keep` results, paired with the same notes when clean. No model calls. |
-| `rejudge_silent_controls.py` | **Independent judge.** Re-judges every accepted `silent_removal` edit with another model (e.g. Qwen), using exactly the judge prompt, inputs and tier rule of `make_silent_removal_controls.py`; prints the tier crosstab, agreement and Cohen's kappa. Used for the cross-family results of the *npj* article. |
+| `rejudge_silent_controls.py` | **Independent judge.** Re-judges every accepted `silent_removal` edit with another model (e.g. Qwen), using exactly the judge prompt, inputs and tier rule of `make_silent_removal_controls.py`; prints the tier crosstab, agreement and Cohen's kappa. Used for the cross-family results of the second article. |
 | `prepare_judge_input.py` | Builds `notes.jsonl` (clean note, both edits and the original tier per note) for `Judge.py`. |
 | `Judge.py` | Supplementary independent judge with its own three-way prompt (explicit / implied / none). Also judges the clean notes (pre-filter) and the `silent_keep` edits, and writes ID lists of the notes it validates. Its prompt differs from the original judge, so tier agreement from this script is **not** comparable with the original judge; use `rejudge_silent_controls.py` for that. |
 | `qwen_subset_eval.py` | Scores both gates on the ID lists written by `Judge.py report`, paired with the same notes when clean. No model calls. |
 | `shortcut_baseline.py` | No-learning shortcut rule (one day mention → overlap; treatment mentioned first → EVENT2-BEFORE-EVENT1; otherwise EVENT1-BEFORE-EVENT2). No model calls. |
 | `check_notice_truncation.py` | Checks whether the appended omission notice survives BERT's 128-token truncation for each notice-appended control. |
-| `verify_paper_numbers.py` | Recomputes every data-derived number in the *npj* article from the saved outputs and compares it with the printed value (OK / MISMATCH / MISSING). No model calls. |
+| `verify_paper_numbers.py` | Recomputes the data-derived numbers of the second article (all results except the retrained gates) from the saved outputs and compares each with the printed value (OK / MISMATCH / MISSING). No model calls. |
+| `train_gate_variants.py` | **Retrained gates.** Retrains a simplified availability gate (mean-pooled BioClinicalBERT with a relation head and an availability head) under five sets of negative training examples (conditions A–E, see step 11), over several seeds, with a frozen or fine-tuned encoder, and scores the original 150 test patients' clean notes and controls. Needs a GPU for the fine-tuned runs. |
+| `summarize_gate_variants.py` | Scores every retrained run (and optionally LLM gate prediction folders) on each input set, with means and standard deviations over seeds; writes the table of retrained gates. No model calls. |
+| `day_cue_check_v2.py` | Compares each retrained gate with simple surface rules ("abstain if the note has no 'day N' mention" / "no digit at all") and splits abstention by control type (remove_evidence, mask token, notice appended). No model calls. |
 
 ---
 
@@ -66,7 +69,7 @@ Only the input corpus is committed. Model outputs, control files, judge outputs,
 
 - Python 3.10 or newer
 - `pip install numpy pandas scipy networkx torch transformers openai`
-- BERT model: `emilyalsentzer/Bio_ClinicalBERT`, downloaded by `transformers`. The encoder is frozen by default; the trainable heads run on CPU or GPU.
+- BERT model: `emilyalsentzer/Bio_ClinicalBERT`, downloaded by `transformers`. The encoder is frozen by default; the trainable heads run on CPU or GPU. The fine-tuned runs of step 11 need a GPU.
 - LLM: an **OpenAI-compatible endpoint** (for example vLLM) serving `mistralai/Mistral-Small-3.2-24B-Instruct-2506`. Pass it with `--api_base`, and set `VLLM_API_KEY` if your server needs a key.
 - Run all scripts from the repository root, so that `provenance_temporal_kg.py` can be imported.
 
@@ -259,7 +262,7 @@ Definitions used throughout:
 ---
 
 
-### 8. Confidence baselines and per-class analysis (*npj* article)
+### 8. Confidence baselines and per-class analysis (second article)
 
 No model calls. The baselines need scores the original exports do not contain, so export them once from the saved BERT weights (no retraining):
 
@@ -306,7 +309,7 @@ python per_class_silent.py \
   --out $D/stratified_all/bert_per_class.csv
 ```
 
-### 9. Independent (cross-family) judge (*npj* article)
+### 9. Independent (cross-family) judge (second article)
 
 The original editor, judge and LLM gate are all Mistral. Because the strict tier is defined by the judge failing to infer the relation, the article re-judges every accepted removal with a model from a different family. Serve it on an OpenAI-compatible endpoint (the article used `Qwen/Qwen3.8-27B` with vLLM) and run from the repository root:
 
@@ -321,7 +324,7 @@ python rejudge_silent_controls.py \
 - The output keeps the original tier in `validity_tier_judge1` and writes the new one to `validity_tier` (`strict`, `implied_only` or `judge_error`).
 - Expected output for the article's run: 0 judge errors; 350 of 507 tiers agree (69.0%, Cohen's κ = 0.40); 219 of 238 original strict notes stay strict; 138 of 269 original implied-only notes become strict.
 
-Gate results on the independent judge's tiers, and on the four combinations of both judges (Table 3 of the article), need no model calls:
+Gate results on the independent judge's tiers, and on the four combinations of both judges (Table 3 of the second article), need no model calls:
 
 ```bash
 # combined label, e.g. "M:strict|Q:strict" = strict under both judges (the judge-independent core)
@@ -362,7 +365,7 @@ python qwen_subset_eval.py --notes $D/synthetic_notes_v1.csv --idlists qwen_vali
 
 `Judge.py` caches every answer in the `--out` file, so an interrupted run resumes where it stopped.
 
-### 10. Shortcut baseline, truncation check and number verification (*npj* article)
+### 10. Shortcut baseline, truncation check and number verification (second article)
 
 No model calls (the truncation check downloads the BioClinicalBERT tokenizer).
 
@@ -384,7 +387,52 @@ python verify_paper_numbers.py --data_dir $D \
   --out_csv paper_number_check.csv
 ```
 
-`verify_paper_numbers.py` prints one row per number (section, quantity, printed value, recomputed value, status). The three runs of the LLM gate are `llm_v2` (first run; Tables 1–3), `llm_conf` (second run, with confidence and re-query scores; Table 5) and `llm_v2_spans` (third run, clean notes only; cited-span analysis). Rows for files a run does not contain are reported as MISSING, not failed.
+`verify_paper_numbers.py` prints one row per number (section, quantity, printed value, recomputed value, status). The three runs of the LLM gate are `llm_v2` (first run; Tables 1–3), `llm_conf` (second run, with confidence and re-query scores; Table 4) and `llm_v2_spans` (third run, clean notes only; cited-span analysis). The retrained gates (Table 5) are reproduced by step 11, not by this script. Rows for files a run does not contain are reported as MISSING, not failed.
+
+### 11. Retrained gates (second article)
+
+The original BERT gate was trained on the marker-carrying controls only. `train_gate_variants.py` retrains a simplified gate under five sets of negative examples and scores all of them on the same 150 test patients as the original run. All conditions share the 700 clean training notes as positives (availability 1):
+
+| Condition | Negatives (availability 0) | Extra positives (availability 1) |
+|---|---|---|
+| A | marker-carrying controls (`remove_evidence`, `mask_temporal_cue`) | – (the original recipe) |
+| B | strict `silent_removal` edits | `silent_keep` rewrites |
+| C | both kinds of negative | `silent_keep` rewrites |
+| D | strict `silent_removal` edits | – |
+| E | as C, but the notice-appended controls (intact note + omission notice) are positives | `silent_keep` rewrites and notice-appended controls |
+
+In E neither the marker nor the edit predicts the label. Test patients are read from the original clean test predictions, so every condition is scored on exactly the notes reported for the original gate; the 700 training patients are redrawn from the other 850 with seed 7.
+
+```bash
+T=$B/provenance_first_availability_supervised_clean_test_predictions.csv
+
+# check the training sets (no training): test sets must be clean 150, unavailable 300,
+# silent_removal 81, silent_keep 70
+python train_gate_variants.py --data_dir $D --test_ids_csv $T --out_dir $D/gate_variants --dry_run
+
+# frozen encoder (heads only, fast)
+python train_gate_variants.py --data_dir $D --test_ids_csv $T \
+  --conditions A,B,C,D,E --seeds 7,13,21,42,101 --lr 1e-3 --epochs 30 \
+  --out_dir $D/gate_variants
+
+# fine-tuned encoder (GPU)
+python train_gate_variants.py --data_dir $D --test_ids_csv $T \
+  --conditions A,B,C,D,E --seeds 7,13,21,42,101 \
+  --unfreeze --epochs 4 --lr 2e-5 --head_lr 1e-3 \
+  --out_dir $D/gate_variants
+
+# summary over seeds (table of retrained gates) and split by control type
+python summarize_gate_variants.py --data_dir $D --runs_dir $D/gate_variants \
+  --llm mistral=$D/llm_v2 --llm mistral_conf=$D/llm_conf \
+  --out_prefix $D/gate_variants_summary
+python day_cue_check_v2.py --data_dir $D --runs_dir $D/gate_variants --out_csv $D/day_cue_check.csv
+```
+
+- Each run writes its predictions to `$D/gate_variants/<condition>_<frozen|unfrozen>_seed<k>/`, in the same format as the original gate. Finished runs are skipped, so an interrupted job can be resubmitted.
+- Only strict-tier removals are used as negatives by default; `--neg_tiers strict,implied_only` adds the implied-only tier.
+- Sanity checks: condition A should reproduce the original gate (about 99% abstention on marker-carrying controls, near 0% on silent removals); the `LLM-mistral` row of the summary must reproduce the original LLM results (72.3% abstention on the strict tier, 27.9% on `silent_keep`), and the `LLM-mistral_conf` row the confidence AUROCs (0.873, 0.876, 0.498).
+- Expected pattern (means over five seeds): A abstains on 96.6% of intact notes with an appended notice and on 0.0% (fine-tuned) of strict silent removals; B and D detect silent removals but answer the intact notes and, once fine-tuned, mostly answer the fixed `remove_evidence` text; C abstains on every kind of control; E (fine-tuned) answers the intact notes and every rewrite and abstains on every `remove_evidence` and mask-token input and on 96.2% of strict removals.
+- On a SLURM cluster, run from an environment whose Python is visible on the compute nodes (e.g. a conda environment created with `conda create -p` on shared storage), and cache the BioClinicalBERT weights on shared storage with `HF_HOME` if the nodes have no internet access.
 
 ---
 
@@ -392,7 +440,8 @@ python verify_paper_numbers.py --data_dir $D \
 
 - **Bit-reproducible from the committed data:** corpus statistics, compression (step 1), the marker-carrying controls (step 3) and the BERT patient split.
 - **Not bit-reproducible:** anything that calls the LLM (paraphrasing, silent controls, gold-span regeneration, LLM gates). Re-runs give close but not identical counts, even at temperature 0.0.
-- **Seeds:** BERT pipelines and splits use seed 7; compression query sampling uses seed 11.
+- **Seeds:** BERT pipelines and splits use seed 7; compression query sampling uses seed 11; the retrained gates (step 11) use seeds 7, 13, 21, 42 and 101.
+- **Retrained gates:** fine-tuning on a GPU is not bit-reproducible across hardware; means over the five seeds are stable (standard deviations of at most a few points, see the summary's `_agg.csv`).
 - **Same model in several roles:** by default the silent-control editor and judge, the gold-span relocator and judge, and the LLM gate are all the same model. Re-running the same judge reproduces 500 of 507 tiers, but a judge from another family (step 9) agrees on only 350 of 507 (κ = 0.40), so report results on the notes both judges accept. `--judge_model` in `make_silent_removal_controls.py` and `regenerate_gold_spans.py` sets a different judge at generation time.
 - **LLM run-to-run stability:** three runs of the LLM gate at temperature 0 gave clean coverage 0.700, 0.699 and 0.694, and 98.3–98.7% identical clean decisions between any two runs.
 - **Majority-class rate:** 0.354 (354 of the 1,000 gold relations are `EVENT1-OVERLAP-EVENT2`).
@@ -405,6 +454,6 @@ Pipeline, compression and provenance graph:
 
 Evidence-unavailable controls, independent judge and abstention protocol:
 
-> J. J. Andrew. *Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction.*
+> J. J. Andrew. *Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction.* Under review (2026).
 
-Archived release: [[https://doi.org/10.5281/zenodo.23809568](https://doi.org/10.5281/zenodo.23810126)](https://doi.org/10.5281/zenodo.23810126)
+Archived release: https://doi.org/10.5281/zenodo.23810126
