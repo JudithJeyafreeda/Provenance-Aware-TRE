@@ -12,11 +12,6 @@ The code tests three auditability properties of a clinical timeline-reconstructi
 
 ---
 
-The same code and data also support a second article, which evaluates the evidence-availability gates in depth:
-
-> **Omission markers rather than missing evidence drive abstention tests in clinical temporal relation extraction** (J. J. Andrew; under review). It adds confidence-thresholding baselines, per-class analyses, run-to-run stability, a no-learning shortcut baseline, **re-judging of the marker-free controls by a model from a different family (Qwen)** and **retraining of the BERT gate under five kinds of negative training examples** (five seeds, frozen and fine-tuned encoder). Steps 8–11 below reproduce its additional results.
-
-
 ## Repository contents
 
 ### Data
